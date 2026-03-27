@@ -23,6 +23,16 @@ ORCA_PATH = r"C:\Program Files\OrcaSlicer\orca-slicer.exe"
 
 ## Step 1 — Install the Macro
 
+### Option A — Create the macro directly in FreeCAD (easiest)
+
+1. In FreeCAD, open **Macro → Macros…**
+2. Click **Create**, enter `ExportToOrca` as the name, and confirm.
+3. FreeCAD opens the built-in editor with an empty macro file.
+4. Paste the full contents of the `ExportToOrca` file from this repository into the editor.
+5. Save the file (**File → Save** or **Ctrl+S**).
+
+### Option B — Copy the file manually
+
 1. Find FreeCAD's **Macro folder**:
    - **Windows:** `%APPDATA%\FreeCAD\Macro\`  
      (paste this path into File Explorer's address bar to open it)
