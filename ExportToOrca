@@ -1,0 +1,77 @@
+import FreeCAD
+import FreeCADGui
+import os
+import subprocess
+from datetime import datetime
+
+# -----------------------------
+# CONFIGURATION
+# -----------------------------
+
+# Fixed export folder
+EXPORT_FOLDER = r"C:\Temp\orca_export"   # Change if needed
+
+# Path to OrcaSlicer executable
+ORCA_PATH = r"C:\Program Files\OrcaSlicer\orca-slicer.exe"
+
+# -----------------------------
+# MAIN FUNCTION
+# -----------------------------
+
+def export_step_to_orca():
+    doc = FreeCAD.ActiveDocument
+    if not doc:
+        FreeCAD.Console.PrintError("No active document.\n")
+        return
+
+    selection = FreeCADGui.Selection.getSelection()
+    if not selection:
+        FreeCAD.Console.PrintError("No objects selected.\n")
+        return
+
+    # Ensure export folder exists
+    if not os.path.exists(EXPORT_FOLDER):
+        os.makedirs(EXPORT_FOLDER)
+
+    # -----------------------------
+    # AUTOMATIC CLEANUP
+    # -----------------------------
+    try:
+        for f in os.listdir(EXPORT_FOLDER):
+            if f.lower().endswith(".step"):
+                try:
+                    os.remove(os.path.join(EXPORT_FOLDER, f))
+                except Exception as e:
+                    FreeCAD.Console.PrintError(f"Could not delete {f}: {e}\n")
+    except Exception as e:
+        FreeCAD.Console.PrintError(f"Cleanup failed: {e}\n")
+
+    # -----------------------------
+    # EXPORT
+    # -----------------------------
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    filename = f"{doc.Label}_{timestamp}.step"
+    file_path = os.path.join(EXPORT_FOLDER, filename)
+
+    try:
+        import ImportGui
+        ImportGui.export(selection, file_path)
+        FreeCAD.Console.PrintMessage(f"STEP exported: {file_path}\n")
+    except Exception as e:
+        FreeCAD.Console.PrintError(f"Export failed: {e}\n")
+        return
+
+    # -----------------------------
+    # LAUNCH ORCASLICER
+    # -----------------------------
+    if not os.path.exists(ORCA_PATH):
+        FreeCAD.Console.PrintError("OrcaSlicer not found. Check ORCA_PATH.\n")
+        return
+
+    try:
+        subprocess.Popen([ORCA_PATH, file_path])
+        FreeCAD.Console.PrintMessage("Opened in OrcaSlicer.\n")
+    except Exception as e:
+        FreeCAD.Console.PrintError(f"Failed to launch OrcaSlicer: {e}\n")
+
+export_step_to_orca()
